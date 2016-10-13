@@ -1,2 +1,2 @@
 # UnfoldedMaps
-Studying project of real-time intercative earthquakes map
+Studying project of real-time interactive earthquakes map
