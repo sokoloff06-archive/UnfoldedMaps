@@ -2,6 +2,7 @@ package module6;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
@@ -12,9 +13,17 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
+import de.fhpotsdam.unfolding.providers.CartoDB;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.MapBox;
+import de.fhpotsdam.unfolding.providers.Microsoft;
+import de.fhpotsdam.unfolding.providers.OpenStreetMap;
+import de.fhpotsdam.unfolding.providers.StamenMapProvider;
+import de.fhpotsdam.unfolding.providers.ThunderforestProvider;
+import de.fhpotsdam.unfolding.providers.Yahoo;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import parsing.ParseFeed;
 import processing.core.PApplet;
 
@@ -34,6 +43,7 @@ public class EarthquakeCityMap extends PApplet {
 	
 	// You can ignore this.  It's to get rid of eclipse warnings
 	private static final long serialVersionUID = 1L;
+	private static final int NUM_TO_PRINT = 20;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
 	private static final boolean offline = false;
@@ -52,6 +62,13 @@ public class EarthquakeCityMap extends PApplet {
 	
 	// The map
 	private UnfoldingMap map;
+	private UnfoldingMap map1;
+	private UnfoldingMap map2;
+	private UnfoldingMap map3;
+	private UnfoldingMap map4;
+	private UnfoldingMap map5;
+	private UnfoldingMap map6;
+	private UnfoldingMap map7;
 	
 	// Markers for each city
 	private List<Marker> cityMarkers;
@@ -65,18 +82,32 @@ public class EarthquakeCityMap extends PApplet {
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
 	
+	private boolean mapChanged = false;
+
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
-		size(900, 700, OPENGL);
+		//size(900, 700, OPENGL);
+		size(displayWidth, displayHeight, P2D);
 		if (offline) {
-		    map = new UnfoldingMap(this, 200, 50, 650, 600, new MBTilesMapProvider(mbTilesString));
+		    map1 = new UnfoldingMap(this, 200, 50, 650, 600, new MBTilesMapProvider(mbTilesString));
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map1 = new UnfoldingMap(this, new OpenStreetMap.PositronMapProvider());
+			map2 = new UnfoldingMap(this, new Google.GoogleMapProvider());
+			map3 = new UnfoldingMap(this, new Microsoft.HybridProvider());
+			map4 = new UnfoldingMap(this, new ThunderforestProvider.Landscape());
+			map5 = new UnfoldingMap(this, new CartoDB.DarkMatter());
+			map6 = new UnfoldingMap(this, new Yahoo.HybridProvider());
+			map7 = new UnfoldingMap(this, new CartoDB.DarkMatter());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
+		if(!mapChanged){
+			map = map1;
+		}
+		
+		
 		MapUtils.createDefaultEventDispatcher(this, map);
 		
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
@@ -85,7 +116,7 @@ public class EarthquakeCityMap extends PApplet {
 		//earthquakesURL = "test2.atom";
 		
 		// Uncomment this line to take the quiz
-		//earthquakesURL = "quiz2.atom";
+		// earthquakesURL = "quiz2.atom";
 		
 		
 		// (2) Reading in earthquake data and geometric properties
@@ -124,21 +155,53 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
+	    sortAndPrint(NUM_TO_PRINT);
+	    
 	    
 	}  // End setup
+	
+	public void keyPressed() {
+	    if (key == '1') {
+	        map = map1;
+	    } else if (key == '2') {
+	        map = map2;
+	    } else if (key == '3') {
+	        map = map3;
+	    } else if (key == '4') {
+	        map = map4;
+	    } else if (key == '5') {
+	        map = map5;
+	    } else if (key == '6') {
+	    	map = map6;
+	    } else if (key == '7') {
+	    	map = map7;
+	    }
+	    mapChanged = true;
+	    
+	 //   setup();
+	    
+	}
 	
 	
 	public void draw() {
 		background(0);
 		map.draw();
 		addKey();
-		
 	}
 	
 	
 	// TODO: Add the method:
 	//   private void sortAndPrint(int numToPrint)
 	// and then call that method from setUp
+	
+	private void sortAndPrint(int numToPrint){
+		Object[] markers = quakeMarkers.toArray();
+		Arrays.sort(markers);
+		for(int i = 0; i < numToPrint; i++){
+			System.out.println(markers[i].toString());	
+		}
+		
+	}
 	
 	/** Event handler that gets called automatically when the 
 	 * mouse moves.
@@ -265,7 +328,7 @@ public class EarthquakeCityMap extends PApplet {
 	// helper method to draw key in GUI
 	private void addKey() {	
 		// Remember you can use Processing's graphics methods here
-		fill(255, 250, 240);
+		fill(255, 250, 240, 230);
 		
 		int xbase = 25;
 		int ybase = 50;
@@ -299,11 +362,11 @@ public class EarthquakeCityMap extends PApplet {
 				10);
 		rect(xbase+35-5, ybase+90-5, 10, 10);
 		
-		fill(color(255, 255, 0));
+		fill(color(0, 255, 0, 150));
 		ellipse(xbase+35, ybase+140, 12, 12);
-		fill(color(0, 0, 255));
+		fill(color(255, 255, 0, 150));
 		ellipse(xbase+35, ybase+160, 12, 12);
-		fill(color(255, 0, 0));
+		fill(color(255, 0, 0, 150));
 		ellipse(xbase+35, ybase+180, 12, 12);
 		
 		textAlign(LEFT, CENTER);

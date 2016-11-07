@@ -10,9 +10,22 @@ import processing.core.PGraphics;
  *
  */
 // TODO: Implement the comparable interface
-public abstract class EarthquakeMarker extends CommonMarker
+public abstract class EarthquakeMarker extends CommonMarker implements Comparable<EarthquakeMarker>
+//Errors occured in Land(Ocean)QuakeMarker classes because of unimplemented method CompareTo()
 {
 	
+	
+	
+	@Override
+	public int compareTo(EarthquakeMarker marker) {
+		if (this.getMagnitude() < marker.getMagnitude())
+			return 1;
+		else if (this.getMagnitude() > marker.getMagnitude())
+			return - 1;
+		else
+			return 0;
+	}
+
 	// Did the earthquake occur on land?  This will be set by the subclasses.
 	protected boolean isOnLand;
 
@@ -134,13 +147,16 @@ public abstract class EarthquakeMarker extends CommonMarker
 		float depth = getDepth();
 		
 		if (depth < THRESHOLD_INTERMEDIATE) {
-			pg.fill(255, 255, 0);
+			pg.fill(0, 255, 0, 150);
+			pg.strokeWeight((float) 0.55);
 		}
 		else if (depth < THRESHOLD_DEEP) {
-			pg.fill(0, 0, 255);
+			pg.fill(255, 255, 0, 150);
+			pg.strokeWeight((float) 0.55);
 		}
 		else {
-			pg.fill(255, 0, 0);
+			pg.fill(255, 0, 0, 150);
+			pg.strokeWeight((float) 0.55);
 		}
 	}
 	
